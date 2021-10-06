@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<title>Parallel Coordinates</title>
+<link rel="stylesheet" type="text/css" href="d3.parcoords.css" />
+<script src="d3.min.js"></script>
+<script src="jquery-1.7.min.js"></script>
+<script src="underscore.js"></script>
+<script src="underscore.math.js"></script>
+<script src="d3.parcoords.js"></script>
+<link rel="stylesheet" type="text/css" href="style.css" />
+
+<h1>
+  Medical Records
+  <small
+    >medications and results not accurate yet. Working on a better
+    clustering</small
+  >
+</h1>
+
+<script id="coloring">
+  // generate data with math functions
+  var data3 = d3
+    .range(-2 * Math.PI, 2 * Math.PI, Math.PI / 40)
+    .map(function (x) {
+      return {
+        'sin(x)': Math.sin(x),
+        'cos(x)': Math.cos(x),
+        'sin(x/2)': Math.sin(x / 2),
+        'sin(x*2)': Math.sin(x * 2),
+        'cos(x/2)': Math.cos(x / 2),
+      }
+    })
+</script>
+
+<script id="coloring-basic">
+  // Code for Colouring Script
+  var colors = d3.scale.category20b()
+
+  // create a chart in every element with class "parcoords-coloring"
+  d3.selectAll('.parcoords-coloring').each(function (d, i) {
+    var color = colors(i)
+
+    var chart = d3
+      .parcoords()(this)
+      .data(data3.slice(7 * i, 7 * i + 30))
+      .alpha(0.6)
+      .color(color)
+      .margin({
+        top: 0,
+        left: 0,
+        bottom: 24,
+        right: 0,
+      })
+      .render()
+
+    // color labels
+    var text = chart.svg
+      .append('text')
+      .attr('x', 162)
+      .attr('y', 64)
+      .style({
+        'text-anchor': 'end',
+        'font-weight': 'bold',
+        'font-size': '11px',
+        fill: '#ddd',
+      })
+      .text(colors(i))
+
+    // hover effect
+    d3.select(this).on({
+      mouseover: function () {
+        text.style('fill', '#222')
+      },
+      mouseout: function () {
+        text.style('fill', '#ddd')
+      },
+    })
+  })
+</script>
+
+<div
+  id="example-progressive"
+  class="parcoords"
+  style="width: 1000px; margin-left: -50px; height: 350px; margin-top: 50px"
+>
+</div>
+
+<div
+        id="example-progressive2"
+        class="parcoords"
+        style="width: 1000px; margin-left: -50px; height: 350px; margin-top: 50px"
+></div>
+
+<script id="progressive">
+  // load csv file and create the chart
+  d3.csv('MedicalData.csv', function (data) {
+    var colorgen = d3.scale
+      .ordinal()
+      .range([
+        '#a6cee3',
+        '#1f78b4',
+        '#b2df8a',
+        '#33a02c',
+        '#fb9a99',
+        '#e31a1c',
+        '#fdbf6f',
+        '#ff7f00',
+        '#cab2d6',
+        '#6a3d9a',
+        '#ffff99',
+        '#b15928',
+      ])
+
+    var color = function (d) {
+      return colors(d.DiseasesGroups)
+    }
+
+    var parcoords = d3
+      .parcoords()('#example-progressive')
+      .data(data)
+      .hideAxis(['Diseases'])
+      .color(color)
+      .alpha(0.25)
+      .composite('darken')
+      .margin({ top: 120, left: 120, bottom: 12, right: 50 })
+      .mode('queue')
+      .render()
+      .brushMode('1D-axes') // enable brushing
+
+    parcoords.svg.selectAll('text').style('font', '10px sans-serif')
+  })
+</script>
+
+<script>
+  // Code viewer   You need to enter text in the Pre above to show code using script below
+  d3.selectAll('.show-code').on('click', function (d) {
+    var code = d3.select('#' + d3.select(this).attr('data-code')).text()
+    d3.select(this.parentNode).text(code)
+    event.preventDefault()
+  })
+</script>
